@@ -1,0 +1,14 @@
+# prevent browser from listing files in dirs
+Options -Indexes
+
+# enable runtime rewriting
+RewriteEngine on
+
+# file dne proceed to rewrite rule 
+RewriteCond %{REQUEST_FILENAME} !-f
+
+# directory dne proceed to rewrite rule 
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# direct all traffic to our index.php file
+RewriteRule ^(.*)$ index.php?$1

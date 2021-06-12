@@ -1,0 +1,59 @@
+@charset "utf-8";
+
+a {
+	text-decoration: none;
+	color: #43b047;
+	font-size: 18px;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+body {
+	background: #181818;
+	font-family: 'Ubuntu', 'Helvetica', sans-serif;
+	color: #ffffff;
+	margin: 0;
+	padding: 0;
+	font-size: 12px;
+}
+
+h1 {
+	color: #0ab4e1;
+	font-weight: bold;
+	padding: 0;
+	margin: 0;
+	font-size: 80px;
+}
+
+h3 {
+	margin-top: 30px;
+	margin-bottom: 30px;
+	font-weight: normal;
+	padding: 0;
+	margin: 0;
+	font-size: 28px;
+}
+
+.info-text-heading-bar {
+	color: #e3e3e3;
+	font-size: 18px;
+	font-weight: bold;
+}
+
+.info-text-toggle {
+	float: right;
+	color: #aaaaaa;
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.info-text {
+	margin-top: 5px;
+}
+
+.section-container {
+	margin-top: 30px;
+	margin-bottom: 30px;
+}
