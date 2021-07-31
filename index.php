@@ -5,8 +5,11 @@
 	// get protocol
 	defined( 'PROTOCOL' ) or define( 'PROTOCOL', isset( $_SERVER['HTTPS'] ) && $_SERVER['HTTPS'] != 'off' ? 'https://' : 'http://' );
 
+	// host path
+	defined( 'PATH_TO_HOST' ) or define( 'PATH_TO_HOST', PROTOCOL . $_SERVER['HTTP_HOST'] . '/' );
+
 	// url path to root
-	defined( 'BASE_URL' ) or define( 'BASE_URL', PROTOCOL . $_SERVER['HTTP_HOST'] . dirname( $_SERVER['PHP_SELF'] ) . '/' );
+	defined( 'BASE_URL' ) or define( 'BASE_URL', PATH_TO_HOST . dirname( $_SERVER['PHP_SELF'] ) . '/' );
 
 	// url path to asssets like js/css/files
 	defined( 'BASE_URL_ASSETS' ) or define( 'BASE_URL_ASSETS', BASE_URL . 'app/assets/' );
