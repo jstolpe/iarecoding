@@ -20,12 +20,25 @@
 		 * @return void
 		 */
 		public function __construct( $autoloader ) {
-			foreach ( $autoloader->getLoadedModels() as $loadedModel ) { // loop over loaded models
+			// get loaded models
+			$autoloaderModels = $autoloader->getLoadedModels();
+
+			foreach ( $autoloaderModels as $model ) { // loop over loaded models
 				// get the name for the model
-				$modelName = $loadedModel['model_name'];
+				$modelName = $model['model_name'];
 
 				// instantiate model and save it to class variable with name of the model
 				$this->$modelName = new $modelName( $autoloader );
+
+				foreach ( $autoloaderModels as $modelVariable ) { // loop over models adding them all to the parent foreach model so they have access
+					// get model variable name to add to the target model
+					$modelVariableName = $modelVariable['model_name'];
+
+					if ( 'Model' != $modelName && 'Model' != $modelVariableName && $modelName != $modelVariableName ) { // ignore core Model and target model matching the model valiable name
+						// target model and add on the new model with the variable name as its class name
+						$this->$modelName->$modelVariableName = new $modelVariableName( $autoloader );
+					}
+				}
 			}
 		}
 
