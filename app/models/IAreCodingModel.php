@@ -12,6 +12,21 @@
 	 */
 	class IAreCodingModel extends Model {
 		/**
+		 * Class constructor.
+		 *
+		 * Do things upon construction of the model.
+		 *
+		 * @param array $autoloader Instance of the autoloader class.
+		 * @return void
+		 */
+		public function __construct( $autoloader ) {
+			parent::__construct( $autoloader );
+
+			// make sure things are loaded for use in the model
+			$this->loadAllModels( $autoloader, __CLASS__ );
+		}
+
+		/**
 		 * Get iarecoding page text.
 		 *
 		 * @return array for display on the page

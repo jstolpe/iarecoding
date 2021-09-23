@@ -55,6 +55,29 @@
 		}
 
 		/**
+		 * Load other model to specified model for use.
+		 *
+		 * Check the model ane make sure it has access to all other models
+		 *
+		 * @param array  $autoloader Instance of the autoloader class.
+		 * @param string $loadToModelName Name of the model to load all other modes onto.
+		 * @return void
+		 */
+		public function loadAllModels( $autoloader, $loadToModelName ) {
+			if ( !property_exists( $loadToModelName, 'allModelsLoaded' ) ) { // all models have not been loaded for use
+				foreach ( $autoloader->getLoadedModels() as $model ) { // loop over loaded models
+					// get the name for the model
+					$modelName = $model['model_name'];
+
+					if ( $loadToModelName != $modelName && 'Model' != $modelName && 'Model' != $modelName ) { // ignore core Model and target model matching the model valiable name
+						// target model and add on the new model with the variable name as its class name
+						$this->loadModel( $modelName );
+					}
+				}
+			}
+		}
+		
+		/**
 		 * Escape html correctly for output in the browser.
 		 *
 		 * @param string $string string to be escaped for output.

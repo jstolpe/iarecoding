@@ -39,6 +39,8 @@
 						$this->$modelName->$modelVariableName = new $modelVariableName( $autoloader );
 					}
 				}
+
+				$this->$modelName->allModelsLoaded = true;
 			}
 		}
 
