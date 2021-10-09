@@ -45,6 +45,9 @@
 		 * @return void
 		 */
 		public function __construct( $params ) {
+			// check for base folder
+			$_SERVER['REQUEST_URI'] = strpos( $_SERVER['REQUEST_URI'], basename( dirname( __DIR__ ) ) ) === false ? '/' . basename( dirname( __DIR__ ) ) . $_SERVER['REQUEST_URI'] : $_SERVER['REQUEST_URI'];
+			
 			// update request uri base to be our current folder only
 			$_SERVER['REQUEST_URI'] = strstr( $_SERVER['REQUEST_URI'], basename( dirname( __DIR__ ) ) );
 
