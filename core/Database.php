@@ -82,6 +82,13 @@
 		private $_orderBy;
 
 		/**
+		 * Group things.
+		 *
+		 * @var	array
+		 */
+		private $_groupBy;
+
+		/**
 		 * Class constructor.
 		 *
 		 * Setup connection to database and initialize.
@@ -128,6 +135,9 @@
 
 			// empty array for the order by clause
 			$this->_orderBy = array();
+
+			// empty array for the order by clause
+			$this->_groupBy = array();
 
 			// default fetch type to empty string
 			$this->_fetchType = '';
@@ -193,6 +203,28 @@
 
 				// add order by to sql string
 				$this->_sql .= ' ORDER BY ' . implode( ', ', $orderBys );
+			}
+		}
+
+		/**
+		 * Build the group by part of sql.
+		 *
+		 * Loop over and add the group by columns and directions to the sql query.
+		 *
+		 * @return void
+		 */
+		private function _buildGroupBy() {
+			if ( $this->_groupBy ) { // we have group bys
+				// array to implode for sql string
+				$groupBys = array();
+
+				foreach ( $this->_groupBy as $group ) { // loop over group by array
+					// add group by column to sql statement
+					$groupBys[] = $group['column'];
+				}
+
+				// add group by to sql string
+				$this->_sql .= ' GROUP BY ' . implode( ', ', $groupBys );
 			}
 		}
 
@@ -271,6 +303,20 @@
 			$this->_orderBy[] = array(
 				'column' => $column,
 				'direction' => $direction
+			);
+		}
+
+		/**
+		 * Set group by.
+		 *
+		 * Set group by for use when running the query.
+		 *
+		 * @param string $column    Name of the column in for group.
+		 * @return void
+		 */
+		public function groupBy( $column ) {
+			$this->_groupBy[] = array(
+				'column' => $column
 			);
 		}
 
@@ -366,6 +412,9 @@
 
 			// order by
 			$this->_buildOrderBy();
+
+			// order by
+			$this->_buildGroupBy();
 
 			// run query
 			return $this->_runQuery();

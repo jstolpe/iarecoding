@@ -109,6 +109,10 @@
 			// instantiate new controller
 			$controller = new $controller( $autoloader );
 
+			if ( !method_exists( $controller, $method ) ) { // default to index
+				$method = 'index';
+			}
+			
 			// call the controller method with params this function allows for vairable number of params to be passed to a methoc
 			call_user_func_array( array( $controller, $method ), $this->_params );
 		}

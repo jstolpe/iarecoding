@@ -50,8 +50,9 @@
 		 * @return void
 		 */
 		public function loadModel( $modelName ) {
-			// instantiate the model under a class variable with the name of the model
-			$this->$modelName = new $modelName( $this->autoloader );
+			if ( !property_exists( $this, $modelName ) ) { // instantiate the model under a class variable with the name of the model
+				$this->$modelName = new $modelName( $this->autoloader );
+			}
 		}
 
 		/**
