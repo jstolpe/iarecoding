@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jun 12, 2021 at 05:00 PM
+-- Generation Time: Jan 06, 2023 at 06:37 PM
 -- Server version: 5.7.24
 -- PHP Version: 7.3.1
 
@@ -21,6 +21,22 @@ SET time_zone = "+00:00";
 --
 -- Database: `iarecoding`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `sessions`
+--
+
+DROP TABLE IF EXISTS `sessions`;
+CREATE TABLE IF NOT EXISTS `sessions` (
+  `id` varchar(50) NOT NULL,
+  `ip_address` varchar(45) NOT NULL,
+  `timestamp` int(10) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `data` blob,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
