@@ -17,6 +17,9 @@
 	// boolean for using database or not
 	defined( 'USE_DATABASE' ) or define( 'USE_DATABASE', false );
 
+	// boolean for using session or not
+	defined( 'USE_SESSION' ) or define( 'USE_SESSION', false );
+
 	if ( ENVIRONMENT == 'development' ) { // development env specific things
 		// display all errors
 		error_reporting( -1 );
@@ -34,11 +37,18 @@
 		'database' => array( // database info
 			'load' => USE_DATABASE, // should we load the database
 			'creds' => array( // database creds
-				'hostname' => '',
-				'username' => '',
+				'hostname' => 'localhost',
+				'username' => 'root',
 				'password' => '',
-				'database' => ''
+				'database' => 'iarecoding'
 			)
+		),
+		'session' => array( // use session helper and save in database
+			'load' => USE_SESSION, // load session
+			'sess_name' => 'iarecoding', // name of the session
+			'sess_id_time_to_regen' => 300, // number of seconds before a new session id should be regenerated
+			'secs_till_expire' => 86400 * 60, // number of seconds user needs to be inactive expiration
+			'database_table_name' => 'sessions' // table name in the database
 		)
 	);
 
