@@ -23,7 +23,14 @@
 		 *
 		 * @var	object
 		 */
- 		public $database; 		
+ 		public $database;
+
+ 		/**
+		 * Session object.
+		 *
+		 * @var	object
+		 */
+ 		public $session;		
 
  		/**
 		 * Class constructor.
@@ -39,6 +46,9 @@
 
 			// get the database object from autoloader and save it to our class
 			$this->database = $this->autoloader->getDatabase();
+
+			// save session in our global model class
+			$this->session =& $this->autoloader->_session;
 		}
 
 		/**
@@ -77,7 +87,7 @@
 				}
 			}
 		}
-		
+
 		/**
 		 * Escape html correctly for output in the browser.
 		 *

@@ -12,6 +12,13 @@
 	 */
 	class Controller {
 		/**
+		 * Session object.
+		 *
+		 * @var	object
+		 */
+ 		public $session;
+
+		/**
 		 * Class constructor.
 		 *
 		 * Main constructor for all controllers.
@@ -42,6 +49,9 @@
 
 				$this->$modelName->allModelsLoaded = true;
 			}
+
+			// save session in our global model class
+			$this->session =& $autoloader->_session;	
 		}
 
 		/**
