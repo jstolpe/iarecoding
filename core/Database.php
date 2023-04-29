@@ -65,7 +65,21 @@
 		 *
 		 * @var	array
 		 */
-		private $_where;				
+		private $_where;
+
+		/**
+		 * Where in things.
+		 *
+		 * @var	array
+		 */
+		private $_whereIn;
+
+		/**
+		 * Group things.
+		 *
+		 * @var	array
+		 */
+		private $_groups;
 
 		/**
 		 * Join things.
@@ -73,6 +87,13 @@
 		 * @var	array
 		 */
 		private $_join;
+
+		/**
+		 * Limit things.
+		 *
+		 * @var	array
+		 */
+		private $_limit;
 
 		/**
 		 * Order things.
@@ -98,7 +119,7 @@
 		 */
 		public function __construct( $database ) {
 			try { // open pdo connection to the database
-				$this->_conn = new PDO( 'mysql:host=' . $database['hostname'] . ';dbname=' . $database['database'], $database['username'], $database['password'] );
+				$this->_conn = new PDO( 'mysql:host=' . $database['hostname'] . ';charset=utf8;dbname=' . $database['database'], $database['username'], $database['password'] );
 
 				// set pdo to return errors if they happen
 				$this->_conn->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
@@ -133,11 +154,17 @@
 			// empty array for the where clause
 			$this->_where = array();
 
+			// empty array for the where in clause
+			$this->_whereIn = array();
+
 			// empty array for the order by clause
 			$this->_orderBy = array();
 
-			// empty array for the order by clause
+			// empty array for the group by by clause
 			$this->_groupBy = array();
+
+			// empty array for the groups by clause
+			$this->_groups = array();
 
 			// default fetch type to empty string
 			$this->_fetchType = '';
@@ -167,20 +194,118 @@
 		 * @return void
 		 */
 		private function _buildWhere() {
-			if ( $this->_where ) { // we have where clauses to add
+			if ( $this->_where || $this->_whereIn ) { // we have where clauses to add
 				// add where
 				$this->_sql .= ' WHERE';
 
+				// pdo var counter
+				$varCounter = 0;
+
 				foreach ( $this->_where as $where ) { // loop over where array
 					// variable name
-					$columnVariableName = ':' . str_replace( '.', '', $where['column'] );
+					$columnVariableName = ':' . str_replace( '.', '', $where['column'] ) . $varCounter;
 
 					// add where column/value to sql statement
 					$this->_sql .= ' ' . $where['type'] . ' ' . $where['column'] . ' = ' . $columnVariableName;
 
 					// map where vars to values to be used on execution
 					$this->_executeParams[$columnVariableName] = $where['value'];
+
+					// increase counter
+					$varCounter++;
 				}
+
+				foreach ( $this->_whereIn as $whereIn ) { // loop over where in array
+					// variable name
+					$columnVariableName = ':' . str_replace( '.', '', $whereIn['column'] ) . $varCounter;
+
+					// add where column/value to sql statement
+					$this->_sql .= ' ' . $whereIn['type'] . ' ' . $whereIn['column'] . ' ' . $whereIn['in_type'] . ' (';
+
+					foreach ( $whereIn['value'] as $key => $value ) { // loop over array
+						// variable name
+						$inVariableName = $columnVariableName . 'win' . $key;
+						
+						// add where column/value to sql statement
+						$this->_sql .= ( $key ? ',' : '' ) . $inVariableName;
+
+						// map where vars to values to be used on execution
+						$this->_executeParams[$inVariableName] = $value;
+					}
+
+					// finish in statement
+					$this->_sql .= ')';
+
+					// increase counter
+					$varCounter++;
+				}
+			}
+		}
+
+		/**
+		 * Build the groups part of sql.
+		 *
+		 * Loop over and add the groups column/values to the sql query.
+		 *
+		 * @return void
+		 */
+		private function _buildGroups() {
+			if ( $this->_groups ) { // we have groups clauses to add
+				foreach ( $this->_groups as $groupKey => $group ) { // loop over groups
+					// pdo var counter
+					$varCounter = 0;
+
+					// add on the group concat type
+					$this->_sql .= ' ' . $group['type'] . ' ( ';
+
+					foreach ( $group['conditions'] as $condition ) { // loop over group conditions
+						// variable name
+						$columnVariableName = ':' . $groupKey . $varCounter;
+						
+						if ( 'IN' == $condition['operator'] || 'NOT IN' == $condition['operator'] ) { // in command is special
+							// add where column/value to sql statement
+							$this->_sql .= ' ' . $condition['type'] . ' ' . $condition['column'] . ' ' . $condition['operator'] . ' (';
+
+							foreach ( $condition['value'] as $key => $value ) { // loop over array
+								// variable name
+								$inVariableName = $columnVariableName . 'gwin' . $key;
+								
+								// add where column/value to sql statement
+								$this->_sql .= ( $key ? ',' : '' ) . $inVariableName;
+
+								// map where vars to values to be used on execution
+								$this->_executeParams[$inVariableName] = $value;
+							}	
+
+							// finish in statement
+							$this->_sql .= ')';
+						} else { // add command to sql statement
+							$this->_sql .= ' ' . $condition['type'] . ' ' . $condition['column'] . ' ' . $condition['operator'] . ' ' . $columnVariableName;
+
+							// map where vars to values to be used on execution
+					 		$this->_executeParams[$columnVariableName] = $condition['value'];
+					 	}
+
+					 	// increase counter
+						$varCounter++;
+					}
+
+					$this->_sql .= ' ) ';
+				}
+			}
+		}
+
+		/**
+		 * Build the limit part of sql.
+		 *
+		 * Add the limit array to the sql query.
+		 *
+		 * @return void
+		 */
+		private function _buildLimit() {
+			if ( $this->_limit ) { // we have limit to add
+				// add to sql statement
+				$this->_sql .= ' LIMIT ' . $this->_limit['limit'] . ' OFFSET ' .$this->_limit['start'];
 			}
 		}
 
@@ -410,11 +535,17 @@
 			// build where clause
 			$this->_buildWhere();
 
+			// build groups
+			$this->_buildGroups();
+
 			// order by
 			$this->_buildOrderBy();
 
 			// order by
 			$this->_buildGroupBy();
+
+			// build limit clause
+			$this->_buildLimit();
 
 			// run query
 			return $this->_runQuery();
@@ -484,6 +615,79 @@
 		 */
 		public function where( $column, $value, $type = '' ) {
 			$this->_where[] = array(
+				'column' => $column,
+				'value' => $value,
+				'type' => $type
+			);
+		}
+
+		/**
+		 * Set where in.
+		 *
+		 * Set a where clause for use when running the query.
+		 *
+		 * @param string $column Name of the column in the where clause.
+		 * @param string $value  Value for the column in the where clause.
+		 * @param string $inType Value for the the where in type clause.
+		 * @param string $type   Type of where clause. Accepts 'AND', or 'OR'. Default empty;
+		 * @return void
+		 */
+		public function whereIn( $column, $value, $inType, $type = '' ) {
+			$this->_whereIn[] = array(
+				'column' => $column,
+				'value' => $value,
+				'in_type' => $inType,
+				'type' => $type
+			);
+		}
+
+		/**
+		 * Set limit.
+		 *
+		 * Set a limit clause for use when running the query.
+		 *
+		 * @param integer $limit  limit number.
+		 * @param integer $start  starting position.;
+		 * @return void
+		 */
+		public function limit( $limit, $start = 0 ) {
+			$this->_limit = array(
+				'limit' => $limit,
+				'start' => $start
+			);
+		}
+
+		/**
+		 * Set start.
+		 *
+		 * Set a group key in the array.
+		 *
+		 * @param string $key
+		 * @param string $type
+		 * @return void
+		 */
+		public function groupStart( $key, $type ) {
+			$this->_groups[$key] = array(
+				'type' => $type,
+				'conditions' => array()
+			);
+		}
+
+		/**
+		 * Set group.
+		 *
+		 * Set a group clause for use when running the query.
+		 *
+		 * @param string $key
+		 * @param string $command
+		 * @param string $operator
+		 * @param string $column
+		 * @param string $value
+		 * @return void
+		 */
+		public function groupAdd( $key, $column, $operator, $value, $type = '' ) {
+			$this->_groups[$key]['conditions'][] = array(
+				'operator' => $operator,
 				'column' => $column,
 				'value' => $value,
 				'type' => $type
