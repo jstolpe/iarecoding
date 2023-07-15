@@ -205,8 +205,11 @@
 					// variable name
 					$columnVariableName = ':' . str_replace( '.', '', $where['column'] ) . $varCounter;
 
+					// operator
+					$operator = isset( $where['operator'] ) ? $where['operator'] : '=';
+
 					// add where column/value to sql statement
-					$this->_sql .= ' ' . $where['type'] . ' ' . $where['column'] . ' = ' . $columnVariableName;
+					$this->_sql .= ' ' . $where['type'] . ' ' . $where['column'] . ' ' . $operator . ' ' . $columnVariableName;
 
 					// map where vars to values to be used on execution
 					$this->_executeParams[$columnVariableName] = $where['value'];
@@ -618,6 +621,26 @@
 				'column' => $column,
 				'value' => $value,
 				'type' => $type
+			);
+		}
+
+		/**
+		 * Set where custom.
+		 *
+		 * Set a where clause for use when running the query.
+		 *
+		 * @param string $column   Name of the column in the where clause.
+		 * @param string $value    Value for the column in the where clause.
+		 * @param string $operator Operator for the the where in type clause.
+		 * @param string $type     Type of where clause. Accepts 'AND', or 'OR'. Default empty;
+		 * @return void
+		 */
+		public function whereOperator( $column, $value, $operator, $type = '' ) {
+			$this->_where[] = array(
+				'column' => $column,
+				'value' => $value,
+				'type' => $type,
+				'operator' => $operator
 			);
 		}
 
