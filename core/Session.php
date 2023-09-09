@@ -148,7 +148,7 @@
 			);
 
 			// initialize database
-			$this->initializeSessFromDb(); 
+			$this->initializeSessFromDb();
 		}
 
 		/**
@@ -348,15 +348,17 @@
 			// save session id
 			$this->_initialSessId = session_id();
 
-			if ( !isset( $_SESSION[$this->_sessLastRegenKey] ) ) { // no regenerated timestamp in the session
-				// set session last regen time
-				$_SESSION[$this->_sessLastRegenKey] = time();
-			} elseif ( $_SESSION[$this->_sessLastRegenKey] < ( time() - $this->_sessIdTimeToRegen ) ) { // need to regenerate session id
-				// set session last regen time
-				$_SESSION[$this->_sessLastRegenKey] = time();
+			if ( ( empty( $_SERVER['HTTP_X_REQUESTED_WITH'] ) OR strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) !== 'xmlhttprequest' ) ) { // regen when not ajax
+				if ( !isset( $_SESSION[$this->_sessLastRegenKey] ) ) { // no regenerated timestamp in the session
+					// set session last regen time
+					$_SESSION[$this->_sessLastRegenKey] = time();
+				} elseif ( $_SESSION[$this->_sessLastRegenKey] < ( time() - $this->_sessIdTimeToRegen ) ) { // need to regenerate session id
+					// set session last regen time
+					$_SESSION[$this->_sessLastRegenKey] = time();
 
-				// regenerate session id
-				session_regenerate_id( TRUE );
+					// regenerate session id
+					session_regenerate_id( FALSE );
+				}
 			}
 
 			// store regenerated session id
