@@ -10,6 +10,7 @@
 	 * @link		https://github.com/jstolpe/iarecoding
 	 * @version     1.0.0
 	 */
+	#[\AllowDynamicProperties]
 	class Model {
 		/**
 		 * Autoloader array.
