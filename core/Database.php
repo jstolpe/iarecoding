@@ -75,6 +75,13 @@
 		private $_whereIn;
 
 		/**
+		 * Having things.
+		 *
+		 * @var	array
+		 */
+		private $_having;
+
+		/**
 		 * Group things.
 		 *
 		 * @var	array
@@ -163,6 +170,9 @@
 			// empty array for the group by by clause
 			$this->_groupBy = array();
 
+			// empty array for the _having by clause
+			$this->_having = array();
+
 			// empty array for the groups by clause
 			$this->_groups = array();
 
@@ -182,6 +192,40 @@
 				foreach ( $this->_join as $join ) { // loop over joins array
 					// add join to sql statement
 					$this->_sql .= ' ' . strtoupper( $join['type'] ) . ' JOIN ' . $join['table'] . ' ON ( ' . $join['on'] . ' )';
+				}
+			}
+		}
+
+		/**
+		 * Build the hvaing part of sql.
+		 *
+		 * Loop over and add the hvaing column/values to the sql query.
+		 *
+		 * @return void
+		 */
+		private function _buildHaving() {
+			if ( $this->_having ) { // we have having
+				// add where
+				$this->_sql .= ' HAVING';
+
+				// pdo var counter
+				$varCounter = 0;
+
+				foreach ( $this->_having as $having ) { // loop over having array
+					// variable name
+					$columnVariableName = ':' . str_replace( '.', '', $having['column'] ) . $varCounter;
+
+					// operator
+					$operator = isset( $having['operator'] ) ? $having['operator'] : '=';
+
+					// add having column/value to sql statement
+					$this->_sql .= ' ' . $having['type'] . ' ' . $having['column'] . ' ' . $operator . ' ' . $columnVariableName;
+
+					// map having vars to values to be used on execution
+					$this->_executeParams[$columnVariableName] = $having['value'];
+
+					// increase counter
+					$varCounter++;
 				}
 			}
 		}
@@ -541,11 +585,14 @@
 			// build groups
 			$this->_buildGroups();
 
-			// order by
-			$this->_buildOrderBy();
+			// group by
+			$this->_buildGroupBy();
+
+			// build having
+			$this->_buildHaving();
 
 			// order by
-			$this->_buildGroupBy();
+			$this->_buildOrderBy();
 
 			// build limit clause
 			$this->_buildLimit();
@@ -637,6 +684,44 @@
 		 */
 		public function whereOperator( $column, $value, $operator, $type = '' ) {
 			$this->_where[] = array(
+				'column' => $column,
+				'value' => $value,
+				'type' => $type,
+				'operator' => $operator
+			);
+		}
+
+		/**
+		 * Set having.
+		 *
+		 * Set a having clause for use when running the query.
+		 *
+		 * @param string $column Name of the column in the having clause.
+		 * @param string $value  Value for the column in the having clause.
+		 * @param string $type   Type of having clause. Accepts 'AND', or 'OR'. Default empty;
+		 * @return void
+		 */
+		public function having( $column, $value, $type = '' ) {
+			$this->_having[] = array(
+				'column' => $column,
+				'value' => $value,
+				'type' => $type
+			);
+		}
+
+		/**
+		 * Set having custom.
+		 *
+		 * Set a having clause for use when running the query.
+		 *
+		 * @param string $column   Name of the column in the having clause.
+		 * @param string $value    Value for the column in the having clause.
+		 * @param string $operator Operator for the the having in type clause.
+		 * @param string $type     Type of having clause. Accepts 'AND', or 'OR'. Default empty;
+		 * @return void
+		 */
+		public function havingOperator( $column, $value, $operator, $type = '' ) {
+			$this->_having[] = array(
 				'column' => $column,
 				'value' => $value,
 				'type' => $type,
